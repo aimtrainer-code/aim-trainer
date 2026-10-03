@@ -70,10 +70,7 @@ jobs:
           git config user.name "vanta-toolchain-bot"
           git config user.email "toolchain@vanta.invalid"
           git add toolchain
-          git commit -m "chore(toolchain): publish pinned Godot ${{ steps.pin.outputs.version }} binaries
-
-Retrieved from the official Godot release. Verified by the fetch workflow.
-Consumed by scripts/toolchain.sh; not part of the product source."
+          git commit -m "chore(toolchain): publish pinned Godot ${{ steps.pin.outputs.version }} binaries" -m "Fetched from the official Godot release by the toolchain workflow. Consumed by scripts/toolchain.sh. Not part of the product source."
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Summary
