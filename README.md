@@ -2,6 +2,8 @@
 
 ![VANTA — TRAIN WHAT MATTERS.](assets/vanta-banner.svg)
 
+[![Tests](https://github.com/aimtrainer-code/aim-trainer/actions/workflows/tests.yml/badge.svg)](https://github.com/aimtrainer-code/aim-trainer/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **TRAIN WHAT MATTERS.**
 
 A free, open-source, offline-first aim trainer for competitive FPS players. **Pick a drill, aim, shoot, measure, repeat.** Godot 4,
@@ -15,8 +17,10 @@ requirement.
 
 ## What is built and verified
 
-Every claim below is covered by the project's own self-test suite
-(`tools/test.sh` → 63 scripts parsed, 8 test cases, 763 assertions, all passing):
+The project has a headless self-test suite (`tools/test.sh`) that performs a full script
+compile/parse sweep before running the test cases. CI executes the same command on every
+push and pull request. The exact assertion and script counts are reported by the current
+CI run rather than hard-coded here.
 
 - **Sensitivity and input math** — a mouse count converts to degrees by one stated
   coefficient; cm/360 and the inverse; calibration profiles; monitor-distance matched
@@ -46,7 +50,6 @@ Every claim below is covered by the project's own self-test suite
 - Full 3D arena rendering and direct visualisation of the existing analytic simulation.
 - Richer weapon behavior, movement and target geometry in the public renderer.
 - Curriculum, Rival, community content browser and benchmark tooling.
-- Rival, the training curriculum, community content browser, benchmark tools.
 - Most of `docs/` (architecture, input, scenarios, training design, performance,
   building, releasing, modding, legal), `CONTRIBUTING.md`, `SECURITY.md`,
   `CODE_OF_CONDUCT.md`, `CHANGELOG.md` and `RELEASE_REPORT.md`.
