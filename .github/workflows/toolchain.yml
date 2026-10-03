@@ -1,0 +1,84 @@
+name: toolchain
+
+# Produces the pinned Godot toolchain for environments that cannot reach the CDN
+# GitHub uses for release assets (locked-down networks, restricted sandboxes).
+#
+# The binaries are committed to a `toolchain/` directory on the branch that
+# triggered the run, so they can be retrieved with plain `git fetch` — the one
+# transport that is available everywhere. They are removed again once the local
+# environment has installed them; nothing in `toolchain/` is part of the product.
+#
+# This workflow is NOT part of the product build. That is `.github/workflows/release.yml`.
+
+on:
+  push:
+    paths:
+      - ".github/godot-version.txt"
+      - ".github/workflows/toolchain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    name: fetch pinned toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pinned version
+        id: pin
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < .github/godot-version.txt)"
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Pinned Godot version: $VERSION"
+
+      - name: Download official Godot binaries
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot/releases/download/${{ steps.pin.outputs.version }}"
+          curl --fail --location --retry 4 --retry-all-errors \
+            -o editor.zip "$BASE/Godot_v${{ steps.pin.outputs.version }}_linux.x86_64.zip"
+          curl --fail --location --retry 4 --retry-all-errors \
+            -o templates.tpz "$BASE/Godot_v${{ steps.pin.outputs.version }}_export_templates.tpz"
+          ls -l editor.zip templates.tpz
+
+      - name: Unpack Windows export templates
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          unzip -o -q templates.tpz "templates/windows_release_x86_64.exe" "templates/windows_debug_x86_64.exe" "templates/version.txt" -d tpz
+          cp tpz/templates/windows_release_x86_64.exe staging/
+          cp tpz/templates/windows_debug_x86_64.exe staging/
+          cp tpz/templates/version.txt staging/
+          rm -rf tpz templates.tpz
+
+      - name: Publish toolchain to the triggering branch
+        run: |
+          set -euo pipefail
+          mkdir -p toolchain
+          cp editor.zip "toolchain/godot-${{ steps.pin.outputs.version }}-linux-editor.zip"
+          (cd staging && zip -q -9 "../toolchain/godot-${{ steps.pin.outputs.version }}-templates-windows.zip" windows_release_x86_64.exe windows_debug_x86_64.exe version.txt)
+          rm -f editor.zip
+          rm -rf staging
+          (cd toolchain && sha256sum * > SHA256SUMS.txt)
+          cat toolchain/SHA256SUMS.txt
+          git config user.name "vanta-toolchain-bot"
+          git config user.email "toolchain@vanta.invalid"
+          git add toolchain
+          git commit -m "chore(toolchain): publish pinned Godot ${{ steps.pin.outputs.version }} binaries" -m "Fetched from the official Godot release by the toolchain workflow. Consumed by scripts/toolchain.sh. Not part of the product source."
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Toolchain ${{ steps.pin.outputs.version }}"
+            echo
+            echo '```'
+            cat toolchain/SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

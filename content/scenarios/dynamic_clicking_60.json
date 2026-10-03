@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "id": "dynamic_clicking_60",
+  "version": 1,
+  "name": "DYNAMIC CLICKING",
+  "description": "Targets move on straight lines at constant speed. The drill is to fire on the crossing, not to chase the target.",
+  "author": "VANTA",
+  "mode": "dynamic_clicking",
+  "tags": [
+    "clicking",
+    "motion"
+  ],
+  "arena": "dojo_open",
+  "weapon": "tactical_rifle",
+  "training": {
+    "skill": "aim_control.tracking",
+    "transfer_stage": "variation",
+    "difficulty": 4
+  },
+  "duration_seconds": 60.0,
+  "targets": [
+    {
+      "type": "sphere",
+      "size": 0.45,
+      "hp": 1.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "sphere_cap",
+    "azimuth_degrees": [
+      -32.0,
+      32.0
+    ],
+    "elevation_degrees": [
+      -10.0,
+      10.0
+    ],
+    "distance_min": 8.0,
+    "distance_max": 14.0,
+    "min_angle_between": 10.0
+  },
+  "lifetime": {
+    "seconds": [
+      3.0,
+      3.0
+    ],
+    "counts_as_miss": true,
+    "die_on_first_hit": true,
+    "respawn_delay": 0.1
+  },
+  "motion": {
+    "model": "linear",
+    "speed": [
+      2.2,
+      4.0
+    ],
+    "direction_duration": [
+      0.5,
+      1.0
+    ],
+    "direction_change_probability": 0.6
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true
+  },
+  "scoring": {
+    "kill_points": 100,
+    "hit_points": 15,
+    "miss_penalty": 3,
+    "streak_bonus": 10,
+    "streak_cap": 10,
+    "accuracy_bonus_rate": 20
+  },
+  "success": {
+    "min_targets": 40,
+    "min_accuracy": 45.0
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "speed",
+      "target_size"
+    ]
+  }
+}

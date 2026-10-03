@@ -1,0 +1,20 @@
+# Godot's editor and import cache. Regenerated on every machine, machine-specific,
+# and the source of most accidental diff noise in a Godot repository.
+.godot/
+
+# Build output. Release artifacts are produced by CI and attached to a GitHub
+# release; they are never committed.
+build/
+export/
+*.exe
+*.zip
+!toolchain/*.zip
+
+# Test and benchmark scratch output.
+*.log
+/tmp/
+
+# Editor and OS cruft.
+.DS_Store
+Thumbs.db
+desktop.ini

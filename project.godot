@@ -1,0 +1,72 @@
+; VANTA — competitive FPS aim trainer
+; Godot project configuration. Engine version is pinned in .github/godot-version.txt.
+;
+; Design notes:
+;  - The simulation is analytic (closed-form motion + analytic hit tests), so it does
+;    not depend on the physics server. Physics ticks are therefore only used by the
+;    optional character controller and are kept at the default rate.
+;  - Input actions are registered in code (src/input/input_bindings.gd) so that they are
+;    data-driven, rebindable and unit-testable. Only the engine-provided `ui_*` actions
+;    are relied upon from the engine.
+
+config_version=5
+
+[application]
+
+config/name="VANTA"
+config/description="VANTA — TRAIN WHAT MATTERS. A free, open-source, offline-first competitive FPS aim trainer."
+config/version="0.1.0"
+run/main_scene="res://scenes/root.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/quit_on_go_back=false
+boot_splash/bg_color=Color(0.0313726, 0.0352941, 0.0431373, 1)
+boot_splash/show_image=false
+boot_splash/fullsize=false
+
+[autoload]
+
+App="*res://src/core/app.gd"
+Events="*res://src/core/events_bus.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="disabled"
+window/vsync/vsync_mode=1
+window/size/resizable=true
+mouse_cursor/custom_image=""
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=false
+pointing/emulate_mouse_from_touch=false
+pointing/warp_mouse=false
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=8
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.0313726, 0.0352941, 0.0431373, 1)
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=0
+anti_aliasing/quality/screen_space_aa=0
+anti_aliasing/quality/use_taa=false
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
+lights_and_shadows/directional_shadow/size=2048
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
+global_illumination/gi/use_half_resolution=true
+occlusion_culling/use_occlusion_culling=false
+shading/overrides/force_vertex_shading=false
+limits/opengl/max_lights_per_object=4
+
+[threading]
+
+worker_pool/max_threads=1

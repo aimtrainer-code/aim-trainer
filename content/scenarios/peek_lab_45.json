@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "peek_lab_45",
+  "version": 1,
+  "name": "PEEK LAB",
+  "description": "Targets hide behind walls and swing out for a fraction of a second. The drill is a pre-aimed, single, patient shot.",
+  "author": "VANTA",
+  "mode": "peek_lab",
+  "tags": [
+    "tactical",
+    "peek",
+    "reaction"
+  ],
+  "arena": "peek_boxes",
+  "weapon": "precision_rifle",
+  "training": {
+    "skill": "tactical.peek_punish",
+    "transfer_stage": "pressure",
+    "difficulty": 7
+  },
+  "duration_seconds": 45.0,
+  "targets": [
+    {
+      "type": "humanoid",
+      "size": 1.8,
+      "hp": 30.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "cover_edge",
+    "azimuth_degrees": [
+      -14.0,
+      14.0
+    ],
+    "elevation_degrees": [
+      -5.0,
+      5.0
+    ],
+    "distance_min": 5.0,
+    "distance_max": 20.0,
+    "anchor_ids": [
+      "peek_left",
+      "peek_left_inner",
+      "peek_right_inner",
+      "peek_right"
+    ]
+  },
+  "lifetime": {
+    "seconds": [
+      7.0,
+      7.0
+    ],
+    "counts_as_miss": false,
+    "die_on_first_hit": false,
+    "respawn_delay": 0.2
+  },
+  "motion": {
+    "model": "peek",
+    "speed": [
+      3.2,
+      4.6
+    ],
+    "direction_duration": [
+      0.6,
+      1.3
+    ],
+    "lateral_only": 1.0,
+    "peek_behaviour": "auto"
+  },
+  "reaction": {
+    "human_delay": [
+      0.0,
+      0.0
+    ],
+    "hesitation_chance": 0.0,
+    "reengage_delay": [
+      0.25,
+      0.9
+    ],
+    "reengage_chance": 0.35
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true
+  },
+  "scoring": {
+    "kill_points": 120,
+    "hit_points": 20,
+    "miss_penalty": 5,
+    "streak_bonus": 15,
+    "streak_cap": 10,
+    "accuracy_bonus_rate": 25
+  },
+  "success": {
+    "min_targets": 12,
+    "min_accuracy": 50.0
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "peek_difficulty",
+      "target_lifetime"
+    ],
+    "min_attempts_between_changes": 2,
+    "max_steps_per_session": 3
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "reactive_tracking_30",
+  "version": 1,
+  "name": "REACTIVE TRACKING",
+  "description": "The target changes direction faster the longer you hold it. Reacting is the drill; predicting is the mistake.",
+  "author": "VANTA",
+  "mode": "reactive_tracking",
+  "tags": [
+    "tracking",
+    "reaction"
+  ],
+  "arena": "dojo_open",
+  "weapon": "tracking_beam",
+  "training": {
+    "skill": "aim_control.tracking",
+    "transfer_stage": "combination",
+    "difficulty": 6
+  },
+  "duration_seconds": 30.0,
+  "targets": [
+    {
+      "type": "sphere",
+      "size": 0.55,
+      "hp": 400.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "sphere_cap",
+    "azimuth_degrees": [
+      -25.0,
+      25.0
+    ],
+    "elevation_degrees": [
+      -8.0,
+      8.0
+    ],
+    "distance_min": 9.0,
+    "distance_max": 15.0
+  },
+  "lifetime": {
+    "seconds": [
+      20.0,
+      20.0
+    ],
+    "counts_as_miss": false,
+    "die_on_first_hit": false,
+    "respawn_delay": 0.5
+  },
+  "motion": {
+    "model": "reactive_strafe",
+    "speed": [
+      2.0,
+      3.2
+    ],
+    "direction_duration": [
+      1.2,
+      2.2
+    ],
+    "reactivity": 0.7,
+    "reaction_cooldown": 0.3,
+    "lateral_only": 1.0
+  },
+  "reaction": {
+    "human_delay": [
+      0.0,
+      0.0
+    ],
+    "reengage_delay": [
+      0.2,
+      0.9
+    ],
+    "reengage_chance": 0.0
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true
+  },
+  "scoring": {
+    "kill_points": 250,
+    "tracking_points_per_second": 12,
+    "tracking_off_target_penalty_per_second": 6
+  },
+  "success": {
+    "min_score": 250
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "speed",
+      "direction_duration"
+    ]
+  }
+}

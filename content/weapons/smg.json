@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "smg",
+  "name": "SMG",
+  "description": "Fast, mobile and imprecise at range: built for movement drills and close target switching, not for precision work.",
+  "archetype": "smg",
+  "automatic": true,
+  "fire_rate_rpm": 900.0,
+  "damage": 22.0,
+  "spread_base_deg": 0.12,
+  "spread_per_shot_deg": 0.16,
+  "spread_max_deg": 3.6,
+  "spread_recovery_deg_per_second": 7.0,
+  "recoil_vertical_deg": 0.28,
+  "recoil_horizontal_deg": 0.16,
+  "recoil_growth": 1.03,
+  "magazine": 30,
+  "reload_seconds": 2.1,
+  "movement_inaccuracy_deg": 0.9,
+  "movement_reference_speed": 3.4,
+  "ads_enabled": false
+}
