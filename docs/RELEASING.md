@@ -38,12 +38,14 @@ The exact version should be changed to match the project version being released.
 
 ## Release contents
 
-The Windows release ZIP contains:
+Each GitHub Release publishes these Windows assets:
 
-- `VANTA.exe`
-- `VANTA.pck`
+- `VANTA.exe` — the Windows executable
+- `VANTA.pck` — the project data required by the executable
+- `VANTA-windows-x64.zip` — convenient package containing the EXE and PCK
+- `VANTA-windows-x64.zip.sha256` — SHA-256 checksum for the ZIP
 
-The adjacent `.sha256` file can be used to verify the downloaded ZIP.
+For the normal end-user download, the ZIP is the recommended option because it keeps the executable and its data file together.
 
 ## Pre-release checklist
 
