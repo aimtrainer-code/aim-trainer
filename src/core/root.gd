@@ -381,7 +381,7 @@ func _draw_menu(size: Vector2) -> void:
 	_draw_text(Vector2(66, 142), "SELECT A DRILL", 13, Color("#a9b4be"))
 
 	for i in SCENARIO_ORDER.size():
-		var id := SCENARIO_ORDER[i]
+		var id: String = SCENARIO_ORDER[i]
 		var def: ScenarioDefinition = App.content.scenario(id) if App != null and App.content != null else null
 		var y := 170.0 + float(i) * 48.0
 		var selected_row := i == selected
