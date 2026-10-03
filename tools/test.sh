@@ -16,5 +16,9 @@ fi
 
 # Import first: it regenerates .godot/global_script_class_cache.cfg, which is what
 # makes `class_name` types resolvable for scripts executed with --script.
-"$GODOT" --headless --path "$ROOT" --import >/dev/null 2>&1 || true
-"$GODOT" --headless --path "$ROOT" --script res://tests/run_tests.gd -- "$@"
+# Do not hide import failures: a broken import should fail CI just like a broken test.
+mkdir -p "$ROOT/build"
+"$GODOT" --headless --path "$ROOT" --import 2>&1 | tee "$ROOT/build/import.log"
+
+# Keep a complete, timestamped test log for local debugging and CI artifacts.
+"$GODOT" --headless --path "$ROOT" --script res://tests/run_tests.gd -- "$@" 2>&1 | tee "$ROOT/build/test.log"
