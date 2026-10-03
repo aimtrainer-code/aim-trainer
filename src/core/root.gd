@@ -445,10 +445,6 @@ func _draw_results(size: Vector2) -> void:
 	draw_rect(Rect2(size.x * 0.5 - 150, size.y * 0.67 + 70, 300, 48), Color("#151c24"), true)
 	_draw_text(Vector2(size.x * 0.5 - 80, size.y * 0.67 + 100), "MAIN MENU  [M]", 13, Color("#dce6ed"))
 
-func _draw_metric(pos: Vector2, label: String, value: String) -> void:
-	_draw_text(pos, value, 28, Color("#f1f4f6"), true, 0.0)
-	_draw_text(pos + Vector2(0, 25), label, 11, Color("#65727e"), true, 0.0)
-
 func _draw_crosshair(pos: Vector2, color: Color) -> void:
 	draw_line(pos + Vector2(-18, 0), pos + Vector2(-5, 0), color, 2)
 	draw_line(pos + Vector2(5, 0), pos + Vector2(18, 0), color, 2)
