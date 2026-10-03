@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "pistol",
+  "name": "PISTOL",
+  "description": "Semi-automatic sidearm: the honest test of a single first shot, with a long reset between shots.",
+  "archetype": "pistol",
+  "automatic": false,
+  "fire_rate_rpm": 400.0,
+  "damage": 28.0,
+  "head_multiplier": 1.4,
+  "spread_base_deg": 0.03,
+  "spread_per_shot_deg": 0.6,
+  "spread_max_deg": 3.0,
+  "spread_recovery_deg_per_second": 9.0,
+  "recoil_vertical_deg": 0.5,
+  "recoil_recovery_deg_per_second": 20.0,
+  "magazine": 15,
+  "reload_seconds": 1.8,
+  "ads_enabled": true,
+  "ads_fov": 60.0,
+  "movement_inaccuracy_deg": 1.8
+}

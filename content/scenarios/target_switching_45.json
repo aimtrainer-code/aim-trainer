@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "id": "target_switching_45",
+  "version": 1,
+  "name": "TARGET SWITCHING",
+  "description": "Three targets alive at once, spread out. The drill is decision-making: which target to take, and how fast to move on.",
+  "author": "VANTA",
+  "mode": "target_switching",
+  "tags": [
+    "switching",
+    "tracking"
+  ],
+  "arena": "dojo_open",
+  "weapon": "tactical_rifle",
+  "training": {
+    "skill": "aim_control.target_switching",
+    "transfer_stage": "combination",
+    "difficulty": 5
+  },
+  "duration_seconds": 45.0,
+  "targets": [
+    {
+      "type": "sphere",
+      "size": 0.42,
+      "hp": 1.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 3,
+  "spawn": {
+    "region": "sphere_cap",
+    "azimuth_degrees": [
+      -40.0,
+      40.0
+    ],
+    "elevation_degrees": [
+      -10.0,
+      10.0
+    ],
+    "distance_min": 7.0,
+    "distance_max": 14.0,
+    "min_angle_between": 22.0
+  },
+  "lifetime": {
+    "seconds": [
+      2.0,
+      2.0
+    ],
+    "counts_as_miss": true,
+    "die_on_first_hit": true,
+    "respawn_delay": 0.0
+  },
+  "motion": {
+    "model": "stationary"
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true
+  },
+  "scoring": {
+    "kill_points": 110,
+    "time_bonus_base": 200,
+    "time_bonus_rate": 45,
+    "streak_bonus": 15,
+    "streak_cap": 10,
+    "accuracy_bonus_rate": 20,
+    "miss_penalty": 5
+  },
+  "success": {
+    "min_targets": 45,
+    "min_accuracy": 50.0
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "simultaneous_targets",
+      "target_size"
+    ]
+  }
+}

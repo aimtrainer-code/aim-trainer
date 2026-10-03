@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "headshot_matrix_60",
+  "version": 1,
+  "name": "HEADSHOT MATRIX",
+  "description": "Humanoid targets, and only head hits count. A body hit is recorded as a miss, because in this drill it is one.",
+  "author": "VANTA",
+  "mode": "headshot_matrix",
+  "tags": [
+    "headshots",
+    "precision"
+  ],
+  "arena": "dojo_open",
+  "weapon": "tactical_rifle",
+  "training": {
+    "skill": "aim_control.precision",
+    "transfer_stage": "variation",
+    "difficulty": 6
+  },
+  "duration_seconds": 60.0,
+  "targets": [
+    {
+      "type": "humanoid",
+      "size": 1.8,
+      "hp": 100.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "sphere_cap",
+    "azimuth_degrees": [
+      -30.0,
+      30.0
+    ],
+    "elevation_degrees": [
+      -4.0,
+      4.0
+    ],
+    "distance_min": 8.0,
+    "distance_max": 14.0,
+    "centre_bias": 0.2,
+    "min_angle_between": 8.0
+  },
+  "lifetime": {
+    "seconds": [
+      2.2,
+      2.2
+    ],
+    "counts_as_miss": true,
+    "die_on_first_hit": false,
+    "respawn_delay": 0.05
+  },
+  "motion": {
+    "model": "stationary"
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true,
+    "region_restricted": true
+  },
+  "scoring": {
+    "kill_points": 120,
+    "headshot_points": 60,
+    "hit_points": 10,
+    "miss_penalty": 5,
+    "streak_bonus": 15,
+    "streak_cap": 10,
+    "accuracy_bonus_rate": 25
+  },
+  "success": {
+    "min_headshot_ratio": 70.0,
+    "min_accuracy": 55.0,
+    "min_targets": 20
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "target_size",
+      "target_lifetime"
+    ]
+  }
+}

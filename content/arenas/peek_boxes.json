@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "id": "peek_boxes",
+  "name": "PEEK BOXES",
+  "description": "Two walls with a target hiding behind each end. Four anchors, each with its own peek direction, so a target always steps out into the open and never into the wall.",
+  "author": "VANTA",
+  "half_width": 10.0,
+  "height": 6.0,
+  "depth": 13.0,
+  "floor_y": 0.0,
+  "player_start": [
+    0.0,
+    1.7,
+    4.0
+  ],
+  "primitives": [
+    {
+      "type": "box",
+      "position": [
+        -8.0,
+        0.45,
+        -0.5
+      ],
+      "size": [
+        2.0,
+        0.9,
+        1.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    },
+    {
+      "type": "box",
+      "position": [
+        8.0,
+        0.45,
+        -0.5
+      ],
+      "size": [
+        2.0,
+        0.9,
+        1.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    },
+    {
+      "type": "ramp",
+      "position": [
+        0.0,
+        0.4,
+        1.0
+      ],
+      "size": [
+        4.0,
+        0.8,
+        3.0
+      ],
+      "rise": 0.8,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    }
+  ],
+  "anchors": [
+    {
+      "id": "peek_left",
+      "position": [
+        -8.0,
+        0.9,
+        -5.6
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "peek_axis": [
+        -1,
+        0,
+        0
+      ],
+      "stance": "standing",
+      "tags": [
+        "peek"
+      ],
+      "cover": {
+        "type": "box",
+        "position": [
+          -4.5,
+          1.5,
+          -4.6
+        ],
+        "size": [
+          5.0,
+          3.0,
+          1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "tag": "cover",
+        "material": "grid"
+      }
+    },
+    {
+      "id": "peek_left_inner",
+      "position": [
+        -3.0,
+        0.9,
+        -5.6
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "peek_axis": [
+        1,
+        0,
+        0
+      ],
+      "stance": "standing",
+      "tags": [
+        "peek"
+      ],
+      "cover": {
+        "type": "box",
+        "position": [
+          -4.5,
+          1.5,
+          -4.6
+        ],
+        "size": [
+          5.0,
+          3.0,
+          1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "tag": "cover",
+        "material": "grid"
+      }
+    },
+    {
+      "id": "peek_right_inner",
+      "position": [
+        3.0,
+        0.9,
+        -5.6
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "peek_axis": [
+        -1,
+        0,
+        0
+      ],
+      "stance": "standing",
+      "tags": [
+        "peek"
+      ],
+      "cover": {
+        "type": "box",
+        "position": [
+          4.5,
+          1.5,
+          -4.6
+        ],
+        "size": [
+          5.0,
+          3.0,
+          1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "tag": "cover",
+        "material": "grid"
+      }
+    },
+    {
+      "id": "peek_right",
+      "position": [
+        8.0,
+        0.9,
+        -5.6
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "peek_axis": [
+        1,
+        0,
+        0
+      ],
+      "stance": "standing",
+      "tags": [
+        "peek"
+      ],
+      "cover": {
+        "type": "box",
+        "position": [
+          4.5,
+          1.5,
+          -4.6
+        ],
+        "size": [
+          5.0,
+          3.0,
+          1.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "tag": "cover",
+        "material": "grid"
+      }
+    }
+  ],
+  "spawn_zones": [
+    {
+      "id": "far",
+      "center": [
+        0.0,
+        1.6,
+        -7.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        4.0
+      ]
+    }
+  ]
+}

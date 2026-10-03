@@ -28,15 +28,16 @@ func test_garbage_root_is_replaced_by_defaults() -> void:
 func test_out_of_range_values_are_clamped() -> void:
 	var data := {
 		"mouse": {"dpi": 999999, "sensitivity": -50.0, "vertical_scale": 500.0},
-		"display": {"resolution": [999999, 1], "ui_scale": 99.0, "msaa": 7},
+		"display": {"resolution": [999999, 1], "msaa": 7},
+			"interface": {"ui_scale": 99.0},
 		"audio": {"master": 12.0},
 	}
 	var s: VantaSettings = VantaSettings.from_dict(data)["settings"]
-	assert_eq(s.dpi, VantaSensitivity.DPI_MAX, "dpi clamped to the maximum")
-	assert_eq(s.sensitivity, VantaSensitivity.SENS_MIN, "sensitivity clamped to the minimum")
+	assert_eq(s.dpi, VantaSettings.DPI_MAX, "dpi clamped to the maximum")
+	assert_eq(s.sensitivity, VantaSettings.SENSITIVITY_MIN, "sensitivity clamped to the minimum")
 	assert_almost_eq(s.vertical_scale, 4.0, "vertical scale clamped")
-	assert_eq(s.resolution.x, 7680, "resolution clamped")
-	assert_almost_eq(s.ui_scale, 1.6, "ui scale clamped")
+	assert_eq(s.resolution, Vector2i(1920, 1080), "an impossible resolution is replaced with the default")
+	assert_almost_eq(s.ui_scale, VantaSettings.UI_SCALE_MAX, "ui scale clamped")
 	assert_eq(s.msaa, 0, "invalid msaa falls back to disabled")
 	assert_almost_eq(s.audio_master, 1.0, "volume clamped to 1.0")
 

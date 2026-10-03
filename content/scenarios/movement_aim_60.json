@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "movement_aim_60",
+  "version": 1,
+  "name": "MOVEMENT + AIM",
+  "description": "Targets move between lanes while the player moves. Shots fired while moving cost accuracy, so the drill is to stop, shoot, move.",
+  "author": "VANTA",
+  "mode": "movement_aim",
+  "tags": [
+    "movement",
+    "counter-strafe"
+  ],
+  "arena": "lanes",
+  "weapon": "smg",
+  "training": {
+    "skill": "aim_movement.counter_strafe",
+    "transfer_stage": "combination",
+    "difficulty": 6
+  },
+  "duration_seconds": 60.0,
+  "targets": [
+    {
+      "type": "sphere",
+      "size": 0.5,
+      "hp": 1.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "box_volume",
+    "azimuth_degrees": [
+      -35.0,
+      35.0
+    ],
+    "elevation_degrees": [
+      -8.0,
+      8.0
+    ],
+    "distance_min": 9.0,
+    "distance_max": 16.0,
+    "min_angle_between": 12.0
+  },
+  "lifetime": {
+    "seconds": [
+      3.0,
+      3.0
+    ],
+    "counts_as_miss": true,
+    "die_on_first_hit": true,
+    "respawn_delay": 0.1
+  },
+  "motion": {
+    "model": "short_strafe",
+    "speed": [
+      1.2,
+      2.4
+    ],
+    "direction_duration": [
+      0.6,
+      1.2
+    ],
+    "lateral_only": 1.0
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": false,
+    "stay_in_bounds": true,
+    "require_stationary": true,
+    "stationary_threshold": 0.6,
+    "max_misses": 0
+  },
+  "scoring": {
+    "kill_points": 100,
+    "time_bonus_base": 200,
+    "time_bonus_rate": 40,
+    "streak_bonus": 10,
+    "accuracy_bonus_rate": 20,
+    "miss_penalty": 5
+  },
+  "success": {
+    "min_accuracy": 45.0,
+    "min_targets": 30
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "speed",
+      "target_size"
+    ]
+  }
+}

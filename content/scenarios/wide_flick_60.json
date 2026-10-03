@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "wide_flick_60",
+  "version": 1,
+  "name": "WIDE FLICK",
+  "description": "Angles across the whole field of view with no centre bias. Targets never repeat a side twice in a row.",
+  "author": "VANTA",
+  "mode": "wide_flick",
+  "tags": [
+    "flicking",
+    "spatial"
+  ],
+  "arena": "dojo_open",
+  "weapon": "tactical_rifle",
+  "training": {
+    "skill": "aim_control.flicking",
+    "transfer_stage": "variation",
+    "difficulty": 4
+  },
+  "duration_seconds": 60.0,
+  "targets": [
+    {
+      "type": "sphere",
+      "size": 0.5,
+      "hp": 1.0,
+      "weight": 1.0
+    }
+  ],
+  "simultaneous_targets": 1,
+  "spawn": {
+    "region": "sphere_cap",
+    "azimuth_degrees": [
+      -65.0,
+      65.0
+    ],
+    "elevation_degrees": [
+      -14.0,
+      14.0
+    ],
+    "distance_min": 8.0,
+    "distance_max": 18.0,
+    "centre_bias": 0.0,
+    "alternate_sides": true,
+    "min_angle_between": 30.0
+  },
+  "lifetime": {
+    "seconds": [
+      1.5,
+      1.5
+    ],
+    "counts_as_miss": true,
+    "die_on_first_hit": true,
+    "respawn_delay": 0.05
+  },
+  "motion": {
+    "model": "stationary"
+  },
+  "ammo": {
+    "infinite": true
+  },
+  "rules": {
+    "lock_player_position": true
+  },
+  "scoring": {
+    "kill_points": 100,
+    "time_bonus_base": 260,
+    "time_bonus_rate": 55,
+    "streak_bonus": 15,
+    "streak_cap": 10,
+    "accuracy_bonus_rate": 15,
+    "miss_penalty": 5
+  },
+  "success": {
+    "min_accuracy": 50.0,
+    "min_targets": 25
+  },
+  "adaptive": {
+    "enabled": true,
+    "rule": "band",
+    "adjusts": [
+      "spawn_angle",
+      "target_size"
+    ],
+    "min_attempts_between_changes": 2
+  }
+}

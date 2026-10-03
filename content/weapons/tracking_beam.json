@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "tracking_beam",
+  "name": "TRACKING BEAM",
+  "description": "A continuous beam with no recoil and no cone of fire. It exists so tracking is trained as tracking: the score follows how long the beam stays on the target. Damage arrives in beam_tick_seconds ticks at beam_damage_per_second; fire_rate_rpm only bounds how often the trigger can re-acquire.",
+  "archetype": "tracking_beam",
+  "automatic": true,
+  "fire_rate_rpm": 3000.0,
+  "damage": 1.0,
+  "spread_base_deg": 0.0,
+  "spread_per_shot_deg": 0.0,
+  "spread_max_deg": 0.0,
+  "recoil_vertical_deg": 0.0,
+  "recoil_horizontal_deg": 0.0,
+  "beam": true,
+  "beam_tick_seconds": 0.1,
+  "beam_damage_per_second": 60.0,
+  "magazine": 500,
+  "reload_seconds": 0.0,
+  "ads_enabled": false,
+  "movement_inaccuracy_deg": 0.0
+}

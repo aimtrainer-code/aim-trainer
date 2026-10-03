@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "id": "lanes",
+  "name": "LANES",
+  "description": "Two long walls split the room into three lanes. Targets spawn in a lane, so the player has to move, not just flick.",
+  "author": "VANTA",
+  "half_width": 13.0,
+  "height": 7.0,
+  "depth": 16.0,
+  "floor_y": 0.0,
+  "player_start": [
+    0.0,
+    1.7,
+    7.0
+  ],
+  "primitives": [
+    {
+      "type": "box",
+      "position": [
+        -4.5,
+        1.5,
+        -3.0
+      ],
+      "size": [
+        0.6,
+        3.0,
+        14.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    },
+    {
+      "type": "box",
+      "position": [
+        4.5,
+        1.5,
+        -3.0
+      ],
+      "size": [
+        0.6,
+        3.0,
+        14.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    },
+    {
+      "type": "ramp",
+      "position": [
+        -6.5,
+        0.6,
+        3.0
+      ],
+      "size": [
+        3.0,
+        1.2,
+        4.0
+      ],
+      "rise": 1.2,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    },
+    {
+      "type": "ramp",
+      "position": [
+        6.5,
+        0.6,
+        3.0
+      ],
+      "size": [
+        3.0,
+        1.2,
+        4.0
+      ],
+      "rise": 1.2,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tag": "cover",
+      "material": "grid"
+    }
+  ],
+  "spawn_zones": [
+    {
+      "id": "left_lane",
+      "center": [
+        -9.5,
+        1.6,
+        -6.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        6.0
+      ]
+    },
+    {
+      "id": "right_lane",
+      "center": [
+        9.5,
+        1.6,
+        -6.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        6.0
+      ]
+    },
+    {
+      "id": "centre",
+      "center": [
+        0.0,
+        1.6,
+        -12.0
+      ],
+      "size": [
+        6.0,
+        3.0,
+        3.0
+      ]
+    }
+  ]
+}
