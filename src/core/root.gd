@@ -1,26 +1,39 @@
 class_name VantaRoot
 extends Node2D
 
-## First playable VANTA shell.
+## Public playable VANTA build.
+## This is the presentation layer for the existing deterministic/content-driven core:
+## scenario selection -> aim drill -> results -> replay.
 ##
-## This view intentionally stays thin: it owns presentation and the training loop,
-## while App/InputService remain responsible for settings and raw mouse input.
-## The first milestone is a dependency-free, playable click drill that boots directly
-## from the existing root.tscn and can later be replaced by the full 3D arena without
-## changing the simulation contracts.
+## The first release deliberately uses a lightweight 2D renderer. It makes the project
+## immediately playable on Windows without adding a physics dependency, while keeping
+## the existing ScenarioDefinition/ContentLibrary/SaveService contracts intact.
 
-const TARGET_RADIUS := 34.0
-const TARGET_MIN := 70.0
-const TARGET_MAX := 150.0
-const TARGET_LIFETIME := 2.5
-const TARGETS_TO_PLAY := 30
-const HIT_FLASH_SECONDS := 0.08
+const SCENARIO_ORDER := [
+	"static_precision_60", "micro_flick_60", "wide_flick_60",
+	"dynamic_clicking_60", "smooth_tracking_30", "reactive_tracking_30",
+	"target_switching_45", "headshot_matrix_60", "movement_aim_60", "peek_lab_45",
+]
+const TARGET_RADIUS_MIN := 18.0
+const TARGET_RADIUS_MAX := 48.0
+const TARGET_LIFETIME_DEFAULT := 2.0
+
+enum Screen { MENU, RUN, RESULTS }
 
 var input_service: InputService
+var screen: Screen = Screen.MENU
+var selected := 0
+var scenario_id := "static_precision_60"
+var definition: ScenarioDefinition = null
+
+var rng := RandomNumberGenerator.new()
+var aim_point := Vector2.ZERO
 var target_position := Vector2.ZERO
-var target_radius := TARGET_RADIUS
+var target_velocity := Vector2.ZERO
+var target_radius := 32.0
 var target_alive := false
 var target_spawn_time := 0.0
+var session_time := 0.0
 var target_count := 0
 var hits := 0
 var shots := 0
@@ -28,112 +41,140 @@ var score := 0
 var streak := 0
 var best_streak := 0
 var total_reaction := 0.0
-var running := false
+var last_result := ""
 var paused := false
-var finished := false
 var hit_flash := 0.0
 var miss_flash := 0.0
-var session_time := 0.0
-var rng := RandomNumberGenerator.new()
-var aim_point := Vector2.ZERO
-var status_text := "CLICK TO START"
-var status_detail := "30 targets  •  left click to shoot  •  R to restart  •  ESC to release mouse"
-var last_result := ""
+var finished := false
+var menu_mouse := Vector2.ZERO
 
 func _ready() -> void:
-	set_process(true)
-	rng.seed = 0x56414E5441
+	rng.randomize()
 	input_service = InputService.new()
 	input_service.name = "InputService"
 	add_child(input_service)
 	input_service.fire_pressed.connect(_on_fire)
 	input_service.action_pressed.connect(_on_action)
-	get_viewport().size_changed.connect(_on_viewport_resized)
-	_on_viewport_resized()
+	get_viewport().size_changed.connect(_on_resize)
+	_on_resize()
+	_load_scenario()
+	input_service.release_mouse()
 	queue_redraw()
 
-func _on_viewport_resized() -> void:
+func _on_resize() -> void:
 	if aim_point == Vector2.ZERO:
 		aim_point = get_viewport_rect().size * 0.5
-	else:
-		aim_point.x = clampf(aim_point.x, 0.0, get_viewport_rect().size.x)
-		aim_point.y = clampf(aim_point.y, 0.0, get_viewport_rect().size.y)
 	queue_redraw()
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key := event as InputEventKey
-		if key.keycode == KEY_ESCAPE:
-			if running:
-				paused = not paused
-			if paused:
-				input_service.release_mouse()
-			else:
-				input_service.grab_mouse()
-			status_text = "PAUSED" if paused else "LIVE"
-			queue_redraw()
 
 func _process(delta: float) -> void:
 	if input_service == null:
 		return
-	if not paused:
+
+	if screen == Screen.MENU:
+		menu_mouse = get_viewport().get_mouse_position()
+	elif screen == Screen.RUN and not paused:
 		var look := input_service.consume_look_delta()
-		if running:
-			# The simulation's sensitivity conversion remains the single source of truth.
-			# A small presentation scale maps degrees to screen-space aim movement.
-			var settings := App.settings if App != null else VantaSettings.default_settings()
-			var angular := InputService.delta_to_angles(look, settings)
-			aim_point += Vector2(angular.x, angular.y) * 7.0
-			aim_point.x = clampf(aim_point.x, 24.0, get_viewport_rect().size.x - 24.0)
-			aim_point.y = clampf(aim_point.y, 24.0, get_viewport_rect().size.y - 24.0)
-		if running:
-			session_time += delta
-			if target_alive and session_time - target_spawn_time >= TARGET_LIFETIME:
-				_register_miss("EXPIRED")
-		if hit_flash > 0.0:
-			hit_flash = maxf(0.0, hit_flash - delta)
-		if miss_flash > 0.0:
-			miss_flash = maxf(0.0, miss_flash - delta)
+		var settings := App.settings if App != null and App.settings != null else VantaSettings.default_settings()
+		var angular := InputService.delta_to_angles(look, settings)
+		aim_point += Vector2(angular.x, angular.y) * 7.0
+		var size := get_viewport_rect().size
+		aim_point.x = clampf(aim_point.x, 24.0, size.x - 24.0)
+		aim_point.y = clampf(aim_point.y, 90.0, size.y - 40.0)
+		session_time += delta
+		_update_target(delta)
+		if target_alive and session_time - target_spawn_time >= _lifetime():
+			_register_expiry()
+		if _duration() > 0.0 and session_time >= _duration():
+			_finish_session()
+	elif screen == Screen.RESULTS:
+		menu_mouse = get_viewport().get_mouse_position()
+
+	hit_flash = maxf(0.0, hit_flash - delta)
+	miss_flash = maxf(0.0, miss_flash - delta)
 	queue_redraw()
 
-func _on_fire() -> void:
-	if finished or paused:
-		return
-	if not running:
-		_start_session()
-		return
-	shots += 1
-	if target_alive and aim_point.distance_to(target_position) <= target_radius:
-		var reaction := session_time - target_spawn_time
-		total_reaction += reaction
-		hits += 1
-		streak += 1
-		best_streak = maxi(best_streak, streak)
-		score += 100 + mini(streak, 10) * 10
-		hit_flash = HIT_FLASH_SECONDS
-		last_result = "HIT  %.0f ms" % (reaction * 1000.0)
-		_spawn_target()
-	else:
-		streak = 0
-		miss_flash = HIT_FLASH_SECONDS
-		last_result = "MISS"
-		status_text = "KEEP GOING"
-
-func _on_action(action: String) -> void:
-	match action:
-		"restart_step":
-			_start_session()
-		"pause":
-			paused = not paused
-			if paused:
-				input_service.release_mouse()
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		if key.keycode == KEY_ESCAPE:
+			if screen == Screen.RUN:
+				paused = not paused
+				if paused:
+					input_service.release_mouse()
+				else:
+					input_service.grab_mouse()
 			else:
-				input_service.grab_mouse()
-			status_text = "PAUSED" if paused else "LIVE"
-		"toggle_hud":
+				input_service.release_mouse()
+			queue_redraw()
+			return
+
+		if screen == Screen.MENU:
+			if key.keycode >= KEY_1 and key.keycode <= KEY_9:
+				selected = clampi(int(key.keycode - KEY_1), 0, SCENARIO_ORDER.size() - 1)
+				_load_scenario()
+			if key.keycode == KEY_0:
+				selected = mini(9, SCENARIO_ORDER.size() - 1)
+				_load_scenario()
+			if key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
+				_start_session()
+		elif screen == Screen.RESULTS:
+			if key.keycode == KEY_R or key.keycode == KEY_ENTER:
+				_start_session()
+			elif key.keycode == KEY_M:
+				screen = Screen.MENU
+				input_service.release_mouse()
 			queue_redraw()
 
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+			return
+		if screen == Screen.MENU:
+			_handle_menu_click(mb.position)
+		elif screen == Screen.RESULTS:
+			_handle_results_click(mb.position)
+
+func _handle_menu_click(position: Vector2) -> void:
+	var size := get_viewport_rect().size
+	var list_top := 170.0
+	var row_h := 48.0
+	if position.x >= 80.0 and position.x <= size.x * 0.58:
+		var index := int(floor((position.y - list_top) / row_h))
+		if index >= 0 and index < SCENARIO_ORDER.size():
+			selected = index
+			_load_scenario()
+			queue_redraw()
+			return
+	var button := Rect2(size.x * 0.68, size.y - 125.0, 260.0, 58.0)
+	if button.has_point(position):
+		_start_session()
+
+func _handle_results_click(position: Vector2) -> void:
+	var size := get_viewport_rect().size
+	if Rect2(size.x * 0.5 - 150.0, size.y * 0.67, 300.0, 56.0).has_point(position):
+		_start_session()
+	elif Rect2(size.x * 0.5 - 150.0, size.y * 0.67 + 70.0, 300.0, 48.0).has_point(position):
+		screen = Screen.MENU
+		input_service.release_mouse()
+		queue_redraw()
+
+func _load_scenario() -> void:
+	if selected < 0 or selected >= SCENARIO_ORDER.size():
+		selected = 0
+	scenario_id = SCENARIO_ORDER[selected]
+	if App != null and App.content != null:
+		definition = App.content.scenario(scenario_id)
+	if definition == null:
+		definition = null
+
 func _start_session() -> void:
+	_load_scenario()
+	if definition == null:
+		return
+	screen = Screen.RUN
+	paused = false
+	finished = false
+	target_alive = false
 	target_count = 0
 	hits = 0
 	shots = 0
@@ -142,102 +183,285 @@ func _start_session() -> void:
 	best_streak = 0
 	total_reaction = 0.0
 	session_time = 0.0
-	finished = false
-	running = true
-	paused = false
-	status_text = "LIVE"
-	last_result = ""
+	last_result = "READY"
 	input_service.grab_mouse()
 	_spawn_target()
 
+func _on_action(action: String) -> void:
+	match action:
+		"restart_step":
+			if screen == Screen.RUN:
+				_start_session()
+			elif screen == Screen.RESULTS:
+				_start_session()
+		"pause":
+			if screen == Screen.RUN:
+				paused = not paused
+				if paused:
+					input_service.release_mouse()
+				else:
+					input_service.grab_mouse()
+		"next_step":
+			if screen == Screen.MENU:
+			selected = (selected + 1) % SCENARIO_ORDER.size()
+			_load_scenario()
+
+func _on_fire() -> void:
+	if screen == Screen.MENU:
+		return
+	if screen == Screen.RESULTS:
+		_start_session()
+		return
+	if paused or finished:
+		return
+	shots += 1
+	if target_alive and aim_point.distance_to(target_position) <= target_radius:
+		var reaction := session_time - target_spawn_time
+		total_reaction += reaction
+		hits += 1
+		streak += 1
+		best_streak = maxi(best_streak, streak)
+		var speed_bonus := maxi(0, 250 - int(round(reaction * 60.0)))
+		score += 100 + speed_bonus + mini(streak, 10) * 10
+		hit_flash = 0.08
+		last_result = "HIT   %d ms" % int(round(reaction * 1000.0))
+		_spawn_target()
+	else:
+		streak = 0
+		score = maxi(0, score - 5)
+		miss_flash = 0.08
+		last_result = "MISS"
+
 func _spawn_target() -> void:
-	if target_count >= TARGETS_TO_PLAY:
-		_finish_session()
+	if definition == null:
 		return
 	var size := get_viewport_rect().size
-	var margin := 110.0
-	var candidate := size * 0.5
-	for _i in 12:
-		candidate = Vector2(
-			rng.randf_range(margin, maxf(margin, size.x - margin)),
-			rng.randf_range(120.0, maxf(120.0, size.y - 90.0))
-		)
-		if candidate.distance_to(aim_point) > 150.0:
-			break
-	target_position = candidate
-	target_radius = rng.randf_range(28.0, 42.0)
-	target_count += 1
+	var margin := 90.0
+	var horizontal := _azimuth_range()
+	var vertical := _vertical_range()
+	var centre := Vector2(size.x * 0.5, size.y * 0.5 + 20.0)
+	var angle_x := rng.randf_range(horizontal.x, horizontal.y)
+	var angle_y := rng.randf_range(vertical.x, vertical.y)
+	var radius_factor := clampf(_target_size(), 0.35, 1.25)
+	target_radius = clampf(34.0 * radius_factor, TARGET_RADIUS_MIN, TARGET_RADIUS_MAX)
+	var span_x := maxf(80.0, size.x * 0.36)
+	var span_y := maxf(70.0, size.y * 0.28)
+	target_position = centre + Vector2(angle_x / 60.0 * span_x, angle_y / 20.0 * span_y)
+	target_position.x = clampf(target_position.x, margin, size.x - margin)
+	target_position.y = clampf(target_position.y, 120.0, size.y - margin)
+	if target_position.distance_to(aim_point) < 120.0:
+		target_position.x = clampf(target_position.x + signf(target_position.x - centre.x + 0.01) * 150.0, margin, size.x - margin)
+	target_velocity = _movement_velocity()
 	target_spawn_time = session_time
 	target_alive = true
-	status_detail = "%d / %d targets  •  left click to shoot" % [target_count, TARGETS_TO_PLAY]
+	target_count += 1
 
-func _register_miss(reason: String) -> void:
+func _update_target(delta: float) -> void:
+	if not target_alive:
+		return
+	if _is_moving_mode():
+		target_position += target_velocity * delta
+		var size := get_viewport_rect().size
+		if target_position.x < 90.0 or target_position.x > size.x - 90.0:
+			target_velocity.x *= -1.0
+			target_position.x = clampf(target_position.x, 90.0, size.x - 90.0)
+		if target_position.y < 120.0 or target_position.y > size.y - 90.0:
+			target_velocity.y *= -1.0
+			target_position.y = clampf(target_position.y, 120.0, size.y - 90.0)
+
+func _register_expiry() -> void:
 	if not target_alive:
 		return
 	target_alive = false
 	streak = 0
-	last_result = reason
+	last_result = "EXPIRED"
 	_spawn_target()
 
 func _finish_session() -> void:
-	running = false
+	if finished:
+		return
 	finished = true
+	running = false
 	target_alive = false
 	input_service.release_mouse()
-	var accuracy := (float(hits) / float(shots) * 100.0) if shots > 0 else 0.0
-	var avg := (total_reaction / float(hits)) if hits > 0 else 0.0
-	status_text = "SESSION COMPLETE"
-	status_detail = "Accuracy %.1f%%  •  Avg reaction %.0f ms  •  Best streak %d  •  Score %d" % [
-		accuracy, avg * 1000.0, best_streak, score
-	]
-	last_result = "PRESS R TO RUN AGAIN"
+	var accuracy := _accuracy()
+	var avg_ms := (total_reaction / float(hits) * 1000.0) if hits > 0 else 0.0
+	last_result = "SESSION COMPLETE"
+	var summary := {
+		"scenario_id": scenario_id,
+		"scenario_name": definition.name if definition != null else scenario_id,
+		"mode": definition.mode_id() if definition != null else "custom",
+		"score": score,
+		"stats": {
+			"shots": shots,
+			"hits": hits,
+			"misses": maxi(0, shots - hits),
+			"accuracy_percent": accuracy,
+			"average_reaction_ms": avg_ms,
+			"targets_eliminated": hits,
+			"best_streak": best_streak,
+			"duration_seconds": session_time,
+		},
+	}
+	if App != null and App.boot_finished:
+		App.record_session(summary)
+	screen = Screen.RESULTS
+	queue_redraw()
 
-func _draw() -> void:
-	var size := get_viewport_rect().size
-	# Dark competitive backdrop.
-	draw_rect(Rect2(Vector2.ZERO, size), Color("#080b10"))
-	for x in range(0, int(size.x), 80):
-		draw_line(Vector2(x, 0), Vector2(x, size.y), Color(0.08, 0.10, 0.13, 0.55), 1.0)
-	for y in range(0, int(size.y), 80):
-		draw_line(Vector2(0, y), Vector2(size.x, y), Color(0.08, 0.10, 0.13, 0.55), 1.0)
+func _duration() -> float:
+	return definition.duration_seconds if definition != null else 60.0
 
-	# Header.
-	draw_string(ThemeDB.fallback_font, Vector2(32, 48), "VANTA", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#f2f5f7"))
-	draw_string(ThemeDB.fallback_font, Vector2(32, 74), "TRAIN WHAT MATTERS.", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#7f8b98"))
-	var score_text := "SCORE  %06d    ACC  %.1f%%    STREAK  %02d" % [score, _accuracy(), streak]
-	draw_string(ThemeDB.fallback_font, Vector2(size.x - 32, 48), score_text, HORIZONTAL_ALIGNMENT_RIGHT, -1, 16, Color("#d9e0e6"))
+func _lifetime() -> float:
+	if definition == null:
+		return TARGET_LIFETIME_DEFAULT
+	return definition.lifetime.min_seconds if definition.lifetime.min_seconds > 0.0 else TARGET_LIFETIME_DEFAULT
 
-	# Target.
-	if target_alive and running and not paused:
-		draw_circle(target_position, target_radius + 5.0, Color(0.05, 0.06, 0.08, 0.95))
-		draw_circle(target_position, target_radius, Color("#dce6ed"))
-		draw_circle(target_position, target_radius * 0.72, Color("#121820"))
-		draw_circle(target_position, target_radius * 0.45, Color("#dce6ed"))
-		draw_circle(target_position, target_radius * 0.20, Color("#121820"))
+func _target_size() -> float:
+	if definition == null or definition.target_groups.is_empty():
+		return 1.0
+	return definition.target_groups[0].size
 
-	# Crosshair and click feedback.
-	var cross := aim_point
-	var cross_color := Color("#f2f5f7")
-	if hit_flash > 0.0:
-		cross_color = Color("#78f2a4")
-	elif miss_flash > 0.0:
-		cross_color = Color("#ff6b78")
-	draw_line(cross + Vector2(-18, 0), cross + Vector2(-5, 0), cross_color, 2.0)
-	draw_line(cross + Vector2(5, 0), cross + Vector2(18, 0), cross_color, 2.0)
-	draw_line(cross + Vector2(0, -18), cross + Vector2(0, -5), cross_color, 2.0)
-	draw_line(cross + Vector2(0, 5), cross + Vector2(0, 18), cross_color, 2.0)
-	draw_circle(cross, 2.0, cross_color)
+func _azimuth_range() -> Vector2:
+	if definition == null:
+		return Vector2(-25.0, 25.0)
+	var a := definition.spawn.azimuth_degrees
+	return Vector2(a.x, a.y)
 
-	# Centre status.
-	var status_y := size.y * 0.52
-	draw_string(ThemeDB.fallback_font, Vector2(0, status_y), status_text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 25, Color("#e7edf2"))
-	draw_string(ThemeDB.fallback_font, Vector2(0, status_y + 30), status_detail, HORIZONTAL_ALIGNMENT_CENTER, size.x, 14, Color("#8794a1"))
-	if not last_result.is_empty():
-		draw_string(ThemeDB.fallback_font, Vector2(0, status_y + 56), last_result, HORIZONTAL_ALIGNMENT_CENTER, size.x, 15, cross_color)
+func _vertical_range() -> Vector2:
+	if definition == null:
+		return Vector2(-8.0, 8.0)
+	var a := definition.spawn.elevation_degrees
+	return Vector2(a.x, a.y)
 
-	# Footer.
-	draw_string(ThemeDB.fallback_font, Vector2(32, size.y - 28), "STATIC PRECISION  •  30 TARGETS  •  OFFLINE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#697582"))
-	draw_string(ThemeDB.fallback_font, Vector2(size.x - 32, size.y - 28), "LMB SHOOT   R RESTART   ESC PAUSE", HORIZONTAL_ALIGNMENT_RIGHT, -1, 12, Color("#697582"))
+func _movement_velocity() -> Vector2:
+	if not _is_moving_mode():
+		return Vector2.ZERO
+	var speed := 110.0
+	if definition != null:
+		if definition.mode_id() == "reactive_tracking":
+			speed = 190.0
+		elif definition.mode_id() == "smooth_tracking":
+			speed = 135.0
+		elif definition.mode_id() == "movement_aim":
+			speed = 155.0
+	return Vector2.from_angle(rng.randf_range(0.0, TAU)) * speed
+
+func _is_moving_mode() -> bool:
+	if definition == null:
+		return false
+	return definition.mode_id() in ["dynamic_clicking", "smooth_tracking", "reactive_tracking", "movement_aim"]
 
 func _accuracy() -> float:
 	return float(hits) / float(shots) * 100.0 if shots > 0 else 0.0
+
+func _mode_label() -> String:
+	return definition.mode_label() if definition != null else "CUSTOM"
+
+func _draw() -> void:
+	var size := get_viewport_rect().size
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#070a0e"))
+	_draw_grid(size)
+	if screen == Screen.MENU:
+		_draw_menu(size)
+	elif screen == Screen.RUN:
+		_draw_run(size)
+	else:
+		_draw_results(size)
+
+func _draw_grid(size: Vector2) -> void:
+	for x in range(0, int(size.x), 80):
+		draw_line(Vector2(x, 0), Vector2(x, size.y), Color(0.08, 0.10, 0.13, 0.45), 1.0)
+	for y in range(0, int(size.y), 80):
+		draw_line(Vector2(0, y), Vector2(size.x, y), Color(0.08, 0.10, 0.13, 0.45), 1.0)
+
+func _draw_menu(size: Vector2) -> void:
+	_draw_text(Vector2(64, 74), "VANTA", 42, Color("#f1f4f6"))
+	_draw_text(Vector2(66, 101), "TRAIN WHAT MATTERS.", 14, Color("#7d8995"))
+	_draw_text(Vector2(66, 142), "SELECT A DRILL", 13, Color("#a9b4be"))
+
+	for i in SCENARIO_ORDER.size():
+		var id := SCENARIO_ORDER[i]
+		var def: ScenarioDefinition = App.content.scenario(id) if App != null and App.content != null else null
+		var y := 170.0 + float(i) * 48.0
+		var selected_row := i == selected
+		draw_rect(Rect2(56, y - 29, size.x * 0.56, 40), Color("#151c24") if selected_row else Color("#0d1218"), true)
+		var number := str(i + 1)
+		_draw_text(Vector2(72, y - 4), number, 12, Color("#ff4655") if selected_row else Color("#64717d"))
+		_draw_text(Vector2(106, y - 4), def.name if def != null else id.to_upper(), 16, Color("#f0f4f7") if selected_row else Color("#a9b4be"))
+		_draw_text(Vector2(390, y - 4), def.mode_label() if def != null else "CUSTOM", 11, Color("#778590"))
+		_draw_text(Vector2(size.x * 0.58, y - 4), ("DIFF %d" % def.difficulty) if def != null else "", 11, Color("#778590"))
+
+	draw_rect(Rect2(size.x * 0.66, 160, size.x * 0.29, 270), Color("#0d1218"), true)
+	_draw_text(Vector2(size.x * 0.69, 198), _mode_label(), 21, Color("#f0f4f7"))
+	_draw_text(Vector2(size.x * 0.69, 228), definition.description if definition != null else "Choose a scenario.", 13, Color("#8895a1"))
+	_draw_text(Vector2(size.x * 0.69, 300), "OFFLINE", 12, Color("#78f2a4"))
+	_draw_text(Vector2(size.x * 0.69, 325), "NO ACCOUNT", 12, Color("#78f2a4"))
+	_draw_text(Vector2(size.x * 0.69, 350), "NO TELEMETRY", 12, Color("#78f2a4"))
+	draw_rect(Rect2(size.x * 0.68, size.y - 125, 260, 58), Color("#dce6ed"), true)
+	_draw_text(Vector2(size.x * 0.68 + 72, size.y - 90), "START DRILL  [ENTER]", 14, Color("#0a0d11"))
+	_draw_text(Vector2(64, size.y - 30), "1–0 SELECT    ENTER START    ESC QUIT", 12, Color("#65727e"))
+
+func _draw_run(size: Vector2) -> void:
+	_draw_text(Vector2(28, 42), "VANTA", 22, Color("#f1f4f6"))
+	_draw_text(Vector2(28, 67), _mode_label(), 12, Color("#7d8995"))
+	_draw_text(Vector2(size.x - 28, 42), "SCORE %06d   ACC %.1f%%   STREAK %02d" % [score, _accuracy(), streak], 15, Color("#dce3e8"), true, size.x - 28)
+	_draw_text(Vector2(size.x - 28, 67), "%02d:%02d" % [int(session_time) / 60, int(session_time) % 60], 12, Color("#7d8995"), true, size.x - 28)
+
+	if target_alive and not paused:
+		draw_circle(target_position, target_radius + 5, Color(0.04, 0.05, 0.07, 0.9))
+		draw_circle(target_position, target_radius, Color("#dce6ed"))
+		draw_circle(target_position, target_radius * 0.66, Color("#121820"))
+		draw_circle(target_position, target_radius * 0.37, Color("#ff4655"))
+		draw_circle(target_position, target_radius * 0.13, Color("#121820"))
+
+	var cross_color := Color("#f1f4f6")
+	if hit_flash > 0.0:
+		cross_color = Color("#78f2a4")
+	elif miss_flash > 0.0:
+		cross_color = Color("#ff6675")
+	_draw_crosshair(aim_point, cross_color)
+
+	_draw_text(Vector2(28, size.y - 30), "LMB SHOOT    R RESTART    ESC PAUSE", 12, Color("#65727e"))
+	_draw_text(Vector2(size.x - 28, size.y - 30), "%d / %d TARGETS" % [target_count, maxi(1, int(_duration() / maxf(0.1, _lifetime())))], 12, Color("#65727e"), true, size.x - 28)
+	if paused:
+		draw_rect(Rect2(0, 0, size.x, size.y), Color(0.0, 0.0, 0.0, 0.55))
+		_draw_text(Vector2(0, size.y * 0.48), "PAUSED", 30, Color("#f1f4f6"), true, size.x)
+		_draw_text(Vector2(0, size.y * 0.53), "ESC TO RESUME", 13, Color("#87949f"), true, size.x)
+	else:
+		_draw_text(Vector2(size.x * 0.5, size.y * 0.82), last_result, 14, Color("#8b98a3"), true, size.x * 0.5)
+
+func _draw_results(size: Vector2) -> void:
+	_draw_text(Vector2(0, 115), "SESSION COMPLETE", 32, Color("#f1f4f6"), true, size.x)
+	_draw_text(Vector2(0, 148), definition.name if definition != null else scenario_id, 14, Color("#7d8995"), true, size.x)
+	var avg := (total_reaction / float(hits) * 1000.0) if hits > 0 else 0.0
+	_draw_text(Vector2(0, 230), "%06d" % score, 52, Color("#dce6ed"), true, size.x)
+	_draw_text(Vector2(0, 260), "SCORE", 12, Color("#65727e"), true, size.x)
+	_draw_metric(Vector2(size.x * 0.25, 350), "ACCURACY", "%.1f%%" % _accuracy())
+	_draw_metric(Vector2(size.x * 0.5, 350), "AVG REACTION", "%.0f ms" % avg)
+	_draw_metric(Vector2(size.x * 0.75, 350), "BEST STREAK", "%d" % best_streak)
+	_draw_text(Vector2(0, 520), "%d hits / %d shots" % [hits, shots], 14, Color("#a8b3bd"), true, size.x)
+	_draw_text(Vector2(0, 545), "Your run was saved locally.", 12, Color("#65727e"), true, size.x)
+	draw_rect(Rect2(size.x * 0.5 - 150, size.y * 0.67, 300, 56), Color("#dce6ed"), true)
+	_draw_text(Vector2(size.x * 0.5 - 100, size.y * 0.67 + 35), "RUN AGAIN  [R]", 14, Color("#090c10"))
+	draw_rect(Rect2(size.x * 0.5 - 150, size.y * 0.67 + 70, 300, 48), Color("#151c24"), true)
+	_draw_text(Vector2(size.x * 0.5 - 80, size.y * 0.67 + 100), "MAIN MENU  [M]", 13, Color("#dce6ed"))
+
+func _draw_metric(pos: Vector2, label: String, value: String) -> void:
+	_draw_text(pos, value, 28, Color("#f1f4f6"), true, 0.0)
+	_draw_text(pos + Vector2(0, 25), label, 11, Color("#65727e"), true, 0.0)
+
+func _draw_crosshair(pos: Vector2, color: Color) -> void:
+	draw_line(pos + Vector2(-18, 0), pos + Vector2(-5, 0), color, 2)
+	draw_line(pos + Vector2(5, 0), pos + Vector2(18, 0), color, 2)
+	draw_line(pos + Vector2(0, -18), pos + Vector2(0, -5), color, 2)
+	draw_line(pos + Vector2(0, 5), pos + Vector2(0, 18), color, 2)
+	draw_circle(pos, 2, color)
+
+func _draw_text(pos: Vector2, text: String, size_px: int, color: Color, right: bool = false, right_edge: float = 0.0) -> void:
+	var align := HORIZONTAL_ALIGNMENT_RIGHT if right else HORIZONTAL_ALIGNMENT_LEFT
+	var width := right_edge - pos.x if right and right_edge > pos.x else -1.0
+	draw_string(ThemeDB.fallback_font, pos, text, align, width, size_px, color)
+
+func _draw_metric(pos: Vector2, label: String, value: String) -> void:
+	_draw_text(pos, value, 28, Color("#f1f4f6"), true, pos.x + 140)
+	_draw_text(pos, label, 11, Color("#65727e"), true, pos.x + 140)
