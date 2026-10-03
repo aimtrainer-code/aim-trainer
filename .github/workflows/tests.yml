@@ -45,8 +45,15 @@ jobs:
           chmod +x godot
           ./godot --version
 
+      - name: Validate Godot project
+        run: |
+          set -euo pipefail
+          ./godot --headless --path . --editor --quit
+
       - name: Self test
-        run: GODOT="$PWD/godot" ./tools/test.sh
+        run: |
+          set -euo pipefail
+          GODOT="$PWD/godot" ./tools/test.sh
 
       - name: Upload the test log
         if: always()
