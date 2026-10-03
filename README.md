@@ -6,11 +6,10 @@ A free, open-source, offline-first aim trainer for competitive FPS players. Godo
 typed GDScript, primary platform Windows 11 x64. No account, no telemetry, no network
 requirement.
 
-> **Project status: early playable vertical slice.** The repository now boots directly into a
-> 30-target offline precision drill with mouse aim, hit/miss feedback, score, accuracy,
-> streaks, reaction-time tracking, restart and pause. The full data-driven 3D simulation
-> layer remains under construction; the playable shell is intentionally small so the
-> project has something people can run and evaluate today.
+> **Project status: playable 0.2.0.** VANTA now boots into a complete user loop: choose from the
+> shipped training drills, play a timed aim session, see score/accuracy/reaction results,
+> and replay or switch drills. The existing deterministic simulation/content architecture
+> remains underneath this lightweight public renderer and is ready for the next 3D world pass.
 
 ## What is built and verified
 
@@ -40,21 +39,26 @@ Every claim below is covered by the project's own self-test suite
   composite score, and pass/fail criteria declared by the scenario itself. See
   [`docs/SCORING.md`](docs/SCORING.md).
 
-## What is not built yet
+## What comes next
 
-- Full 3D arena rendering and the complete data-driven scenario/HUD integration.
-- Windows builds and installers. There is no release workflow or release artifact yet.
+- Full 3D arena rendering and direct visualisation of the existing analytic simulation.
+- Richer weapon behavior, movement and target geometry in the public renderer.
+- Curriculum, Rival, community content browser and benchmark tooling.
 - Rival, the training curriculum, community content browser, benchmark tools.
 - Most of `docs/` (architecture, input, scenarios, training design, performance,
   building, releasing, modding, legal), `CONTRIBUTING.md`, `SECURITY.md`,
   `CODE_OF_CONDUCT.md`, `CHANGELOG.md` and `RELEASE_REPORT.md`.
-- **A licence file.** VANTA is intended to be free and open source, but the licence
-  has not been chosen yet — it will be decided once the dependency licence review is
-  complete. Until a licence is committed, the code is all rights reserved.
+- **License:** MIT. See [`LICENSE`](LICENSE).
 
-## Running it
+## Download / run
 
-The repository now has two useful entry points: the headless test suite and a small playable click drill. To run the tests:
+For Windows, the project has a GitHub Actions release pipeline that builds an x64 `.zip` on version tags.
+If a release is available, download the Windows artifact from the repository's **Releases** page.
+For developers, open the project in Godot 4.7.2 and run the main scene.
+
+### Running the tests
+
+The repository also has a headless self-test suite:
 
 ```bash
 GODOT=/path/to/Godot_v4.7.2-stable_linux.x86_64 ./tools/test.sh
@@ -66,8 +70,9 @@ and CI runs exactly this command on every push and pull request
 downloaded: the runner is [`tests/run_tests.gd`](tests/run_tests.gd) and the whole
 suite needs nothing but a Godot binary and this repository.
 
-Launching the project (`godot --path .`) boots VANTA into the playable vertical slice. Left click starts/shoots,
-`R` restarts the drill and `Esc` pauses/releases the mouse. The drill is offline and uses no third-party game assets.
+Launching the project (`godot --path .`) opens the drill selector. Choose a scenario with the mouse or `1`–`0`,
+press Enter to start, use left click to shoot, `R` to restart, `Esc` to pause, and `M` on the results screen to return.
+Runs are stored through the existing local save service. The game is offline and uses no proprietary game assets.
 
 ## Design rules
 
