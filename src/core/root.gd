@@ -281,7 +281,6 @@ func _finish_session() -> void:
 	if finished:
 		return
 	finished = true
-	running = false
 	target_alive = false
 	input_service.release_mouse()
 	var accuracy := _accuracy()
