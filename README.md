@@ -1,8 +1,10 @@
 # VANTA
 
+![VANTA — TRAIN WHAT MATTERS.](assets/vanta-banner.svg)
+
 **TRAIN WHAT MATTERS.**
 
-A free, open-source, offline-first aim trainer for competitive FPS players. Godot 4,
+A free, open-source, offline-first aim trainer for competitive FPS players. **Pick a drill, aim, shoot, measure, repeat.** Godot 4,
 typed GDScript, primary platform Windows 11 x64. No account, no telemetry, no network
 requirement.
 
