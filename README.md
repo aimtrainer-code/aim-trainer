@@ -50,10 +50,21 @@ CI run rather than hard-coded here.
 - Full 3D arena rendering and direct visualisation of the existing analytic simulation.
 - Richer weapon behavior, movement and target geometry in the public renderer.
 - Curriculum, Rival, community content browser and benchmark tooling.
-- Most of `docs/` (architecture, input, scenarios, training design, performance,
-  building, releasing, modding, legal), `CONTRIBUTING.md`, `SECURITY.md`,
-  `CODE_OF_CONDUCT.md`, `CHANGELOG.md` and `RELEASE_REPORT.md`.
+- Additional project documentation covering building, testing, contribution rules,
+  security, release notes and the current project report.
 - **License:** MIT. See [`LICENSE`](LICENSE).
+
+## Documentation
+
+| Document | Purpose |
+| --- | --- |
+| [`docs/BUILDING.md`](docs/BUILDING.md) | Local setup and Windows build flow |
+| [`docs/TESTING.md`](docs/TESTING.md) | Test strategy and CI contract |
+| [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) | Architecture and engineering overview |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
+| [`RELEASE_REPORT.md`](RELEASE_REPORT.md) | 0.2.0 release scope and limitations |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution workflow and coding rules |
+| [`SECURITY.md`](SECURITY.md) | Security and local-data reporting |
 
 ## Download / run
 
