@@ -1,2 +1,3 @@
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  SHA256SUMS.txt
 cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  godot-4.7.2-stable-linux-editor.zip
-5dd5015b9c7758dd5e3017e9c5639058402eb71fa967aff6b3e22418cc172822  godot-4.7.2-stable-templates-windows.zip
+49ffff35162eeadd908ddd6190bea443e39e78abf7de74bc2cab67b9d2dd4ce9  godot-4.7.2-stable-templates-windows.zip
