@@ -15,7 +15,7 @@ config_version=5
 
 config/name="VANTA"
 config/description="VANTA — TRAIN WHAT MATTERS. A free, open-source, offline-first competitive FPS aim trainer."
-config/version="0.1.0"
+config/version="0.2.0"
 run/main_scene="res://scenes/root.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/quit_on_go_back=false
