@@ -59,9 +59,8 @@ jobs:
           cp tpz/templates/windows_release_x86_64.exe dist/templates/
           cp tpz/templates/windows_debug_x86_64.exe dist/templates/
           cp tpz/templates/version.txt dist/templates/
-          rm -f templates.tpz editor.zip
           (cd dist/templates && zip -q -9 ../godot-templates-windows.zip windows_release_x86_64.exe windows_debug_x86_64.exe version.txt)
-          rm -rf dist/templates
+          rm -rf dist/templates tpz templates.tpz
           ls -l dist
 
       - name: Checksums
