@@ -61,6 +61,7 @@ CI run rather than hard-coded here.
 | [`docs/BUILDING.md`](docs/BUILDING.md) | Local setup and Windows build flow |
 | [`docs/TESTING.md`](docs/TESTING.md) | Test strategy and CI contract |
 | [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) | Architecture and engineering overview |
+| [`docs/RELEASING.md`](docs/RELEASING.md) | Version tags and Windows release pipeline |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version history |
 | [`RELEASE_REPORT.md`](RELEASE_REPORT.md) | 0.2.0 release scope and limitations |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution workflow and coding rules |
