@@ -162,10 +162,9 @@ func _load_scenario() -> void:
 	if selected < 0 or selected >= SCENARIO_ORDER.size():
 		selected = 0
 	scenario_id = SCENARIO_ORDER[selected]
+	definition = null
 	if App != null and App.content != null:
 		definition = App.content.scenario(scenario_id)
-	if definition == null:
-		definition = null
 
 func _start_session() -> void:
 	_load_scenario()
@@ -203,8 +202,8 @@ func _on_action(action: String) -> void:
 					input_service.grab_mouse()
 		"next_step":
 			if screen == Screen.MENU:
-			selected = (selected + 1) % SCENARIO_ORDER.size()
-			_load_scenario()
+				selected = (selected + 1) % SCENARIO_ORDER.size()
+				_load_scenario()
 
 func _on_fire() -> void:
 	if screen == Screen.MENU:
