@@ -6,10 +6,11 @@ A free, open-source, offline-first aim trainer for competitive FPS players. Godo
 typed GDScript, primary platform Windows 11 x64. No account, no telemetry, no network
 requirement.
 
-> **Project status: pre-release, not playable yet.** The simulation core is built and
-> verified; the arena view, HUD, input rig and menus that turn it into something you
-> can play are the next milestone. There is no downloadable build yet. What follows is
-> the measured state of this repository, not a roadmap promise.
+> **Project status: early playable vertical slice.** The repository now boots directly into a
+> 30-target offline precision drill with mouse aim, hit/miss feedback, score, accuracy,
+> streaks, reaction-time tracking, restart and pause. The full data-driven 3D simulation
+> layer remains under construction; the playable shell is intentionally small so the
+> project has something people can run and evaluate today.
 
 ## What is built and verified
 
@@ -41,8 +42,7 @@ Every claim below is covered by the project's own self-test suite
 
 ## What is not built yet
 
-- The playable layer: arena view, HUD, results screen, menus. The project currently
-  launches into an empty root scene.
+- Full 3D arena rendering and the complete data-driven scenario/HUD integration.
 - Windows builds and installers. There is no release workflow or release artifact yet.
 - Rival, the training curriculum, community content browser, benchmark tools.
 - Most of `docs/` (architecture, input, scenarios, training design, performance,
@@ -54,7 +54,7 @@ Every claim below is covered by the project's own self-test suite
 
 ## Running it
 
-The test suite is the only thing that runs end to end today:
+The repository now has two useful entry points: the headless test suite and a small playable click drill. To run the tests:
 
 ```bash
 GODOT=/path/to/Godot_v4.7.2-stable_linux.x86_64 ./tools/test.sh
@@ -66,8 +66,8 @@ and CI runs exactly this command on every push and pull request
 downloaded: the runner is [`tests/run_tests.gd`](tests/run_tests.gd) and the whole
 suite needs nothing but a Godot binary and this repository.
 
-Launching the project (`godot --path .`) boots the application, loads and validates all
-content, and currently shows an empty frame — the view layer does not exist yet.
+Launching the project (`godot --path .`) boots VANTA into the playable vertical slice. Left click starts/shoots,
+`R` restarts the drill and `Esc` pauses/releases the mouse. The drill is offline and uses no third-party game assets.
 
 ## Design rules
 
