@@ -70,6 +70,8 @@ jobs:
         with:
           name: VANTA-windows-x64
           path: |
+            build/VANTA.exe
+            build/VANTA.pck
             build/VANTA-windows-x64.zip
             build/VANTA-windows-x64.zip.sha256
 
@@ -80,5 +82,7 @@ jobs:
           name: VANTA ${{ github.ref_name }}
           generate_release_notes: true
           files: |
+            build/VANTA.exe
+            build/VANTA.pck
             build/VANTA-windows-x64.zip
             build/VANTA-windows-x64.zip.sha256
