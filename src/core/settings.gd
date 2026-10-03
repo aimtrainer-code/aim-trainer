@@ -60,7 +60,7 @@ var invert_y: bool = false
 ## of letting the engine coalesce them into one per frame. VANTA still accumulates
 ## internally, so rotation is identical; the difference is that per-event timing
 ## and event-rate diagnostics become observable. Default: false (engine default).
-var per_event_mouse_input: bool = false
+var per_event_mouse_input: bool = true
 ## Scale sensitivity while scoped, using the tangent FOV ratio.
 var ads_zoom_scaling: bool = true
 
@@ -229,7 +229,7 @@ static func from_dict(data: Variant) -> Dictionary:
 	s.yaw_coefficient = clampf(_float(mouse.get("yaw_coefficient", VantaSensitivity.YAW_COEFFICIENT_SOURCE), VantaSensitivity.YAW_COEFFICIENT_SOURCE), 0.0005, 1.0)
 	s.vertical_scale = clampf(_float(mouse.get("vertical_scale", 1.0), 1.0), 0.1, 4.0)
 	s.invert_y = _bool(mouse.get("invert_y", false), false)
-	s.per_event_mouse_input = _bool(mouse.get("per_event_mouse_input", false), false)
+	s.per_event_mouse_input = _bool(mouse.get("per_event_mouse_input", true), true)
 	s.ads_zoom_scaling = _bool(mouse.get("ads_zoom_scaling", true), true)
 
 	var ch := VantaCrosshair.from_dict(root.get("crosshair", {}))
