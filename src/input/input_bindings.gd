@@ -105,9 +105,11 @@ static func sanitise(data: Variant) -> Dictionary:
 		if list.is_empty():
 			if REQUIRED_ACTIONS.has(action_id):
 				repairs.append("'%s' cannot be unbound; default restored" % action_id)
+				table[action_id] = defaults_for(action_id)
 			else:
-				table[action_id] = list
-				continue
+				# Optional actions may legitimately be unbound.
+				table[action_id] = []
+			continue
 		table[action_id] = list
 
 	# Duplicate detection: the same physical input on two actions is a genuine
@@ -169,6 +171,7 @@ static func event_from_descriptor(descriptor: String) -> InputEvent:
 			return null
 		var mb := InputEventMouseButton.new()
 		mb.button_index = button as MouseButton
+		mb.pressed = true
 		return mb
 	if descriptor.begins_with(KEY_PREFIX):
 		var code := int(descriptor.substr(KEY_PREFIX.length()))
@@ -176,6 +179,7 @@ static func event_from_descriptor(descriptor: String) -> InputEvent:
 			return null
 		var ke := InputEventKey.new()
 		ke.physical_keycode = code as Key
+		ke.pressed = true
 		return ke
 	return null
 

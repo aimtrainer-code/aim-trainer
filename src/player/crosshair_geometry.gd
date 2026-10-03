@@ -24,16 +24,16 @@ static func build(config: VantaCrosshair, center_device: Vector2, device_scale: 
 		return out
 
 	var scale: float = device_scale if device_scale > 0.0 else 1.0
-	var thickness: int = maxi(1, int(round(float(config.thickness) * scale)))
-	var length: int = maxi(0, int(round(float(config.length) * scale)))
-	var gap: int = maxi(0, int(round(float(config.gap) * scale)))
+	var thickness: int = maxi(1, roundi(float(config.thickness) * scale))
+	var length: int = maxi(0, roundi(float(config.length) * scale))
+	var gap: int = maxi(0, roundi(float(config.gap) * scale))
 	if config.dynamic_gap:
-		gap += maxi(0, int(round(spread_device * maxf(0.0, config.spread_scale))))
-	var outline_w: int = maxi(0, int(round(float(config.outline_thickness) * scale))) if config.outline else 0
+		gap += maxi(0, roundi(spread_device * maxf(0.0, config.spread_scale)))
+	var outline_w: int = maxi(0, roundi(float(config.outline_thickness) * scale)) if config.outline else 0
 	var wants_dot: bool = config.center_dot or config.style == VantaCrosshair.Style.DOT
-	var dot: int = maxi(1, int(round(float(config.dot_size) * scale))) if wants_dot else 0
+	var dot: int = maxi(1, roundi(float(config.dot_size) * scale)) if wants_dot else 0
 
-	var center := Vector2(round(center_device.x), round(center_device.y))
+	var center: Vector2 = Vector2(roundf(center_device.x), roundf(center_device.y))
 
 	var body_parts: Array[CrosshairPart] = []
 
@@ -53,8 +53,11 @@ static func build(config: VantaCrosshair, center_device: Vector2, device_scale: 
 		_:
 			pass
 
-	var y_center := center.y - floor(float(thickness) * 0.5)
-	var x_center := center.x - floor(float(thickness) * 0.5)
+	# Half-thickness is kept as an explicit float so the parser never has to infer a
+	# type from a Variant-returning cast.
+	var half_thickness: float = 0.5 * float(thickness)
+	var y_center: float = center.y - floorf(half_thickness)
+	var x_center: float = center.x - floorf(half_thickness)
 
 	if length > 0:
 		if draw_left:
@@ -72,7 +75,7 @@ static func build(config: VantaCrosshair, center_device: Vector2, device_scale: 
 		body_parts.append(CrosshairPart.make_arc(Rect2(center.x - outer, center.y - outer, outer * 2.0, outer * 2.0)))
 
 	if dot > 0:
-		var dot_offset := floor(float(dot) * 0.5)
+		var dot_offset: float = floorf(0.5 * float(dot))
 		body_parts.append(CrosshairPart.new(Rect2(center.x - dot_offset, center.y - dot_offset, float(dot), float(dot))))
 
 	# --- outline first so the body draws on top ----------------------------

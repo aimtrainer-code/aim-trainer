@@ -138,51 +138,48 @@ static func ray_obb(origin: Vector3, ray_dir: Vector3, center: Vector3, basis: B
 	return ray_aabb(local_origin, local_dir, Vector3.ZERO, half_size * 2.0)
 
 
-## Ray/capsule (used for limbs of training dummies where a cylinder is a better
-## silhouette than a box). Returns entry distance or -1.0.
+## Ray/capsule (used for the limbs of training dummies, where a cylinder is a
+## better silhouette than a box). Returns the entry distance or -1.0.
+##
+## Uses the standard segment-parameterised quadric for the cylindrical body, with
+## exact rejection of cap hits: a ray can enter the sphere that caps the cylinder
+## without touching the capsule (passing below/above the cap plane), so a cap hit
+## is only accepted when its projection lies outside the segment.
 static func ray_capsule(origin: Vector3, ray_dir: Vector3, a: Vector3, b: Vector3, radius: float) -> float:
 	var ba := b - a
 	var oa := origin - a
 	var baba := ba.dot(ba)
 	if baba < EPSILON:
 		return ray_sphere(origin, ray_dir, a, radius)
-	var bard := ba.dot(ray_dir)
+
+	var bard: float = ba.dot(ray_dir)
 	var baoa: float = ba.dot(oa)
-	var rdoa := ray_dir.dot(oa)
+	var rdoa: float = ray_dir.dot(oa)
 	var oaoa: float = oa.dot(oa)
-	var t := baba - bard * bard
-	if t <= EPSILON:
-		# Parallel: fall back to the closest end cap.
-		var t1 := ray_sphere(origin, ray_dir, a, radius)
-		var t2 := ray_sphere(origin, ray_dir, b, radius)
-		if t1 < 0.0:
-			return t2
-		if t2 < 0.0:
-			return t1
-		return minf(t1, t2)
-	var k: float = oaoa - radius * radius
-	var k2: float = baoa - bard * rdoa
-	return _solve_quadratic(t, k2, k, baba, bard, baoa, radius)
 
+	var best := -1.0
+	var quad_a: float = baba - bard * bard
+	var quad_b: float = baba * rdoa - baoa * bard
+	var quad_c: float = baba * oaoa - baoa * baoa - radius * radius * baba
+	var discriminant: float = quad_b * quad_b - quad_a * quad_c
+	if discriminant >= 0.0 and absf(quad_a) > EPSILON:
+		var sqrt_d := sqrt(discriminant)
+		for root in [(-quad_b - sqrt_d) / quad_a, (-quad_b + sqrt_d) / quad_a]:
+			var t: float = root
+			if t < 0.0:
+				continue
+			var y: float = baoa + t * bard
+			if y > 0.0 and y < baba:
+				best = t if best < 0.0 else minf(best, t)
 
-static func _solve_quadratic(a: float, b: float, c: float, baba: float, bard: float, baoa: float, radius: float) -> float:
-	## Solves the capsule quadric for the cylinder body, clamped to the segment.
-	var discriminant := b * b - a * c
-	if discriminant < 0.0:
-		return -1.0
-	var sqrt_d := sqrt(discriminant)
-	var t := (-b - sqrt_d) / a
-	var y := baoa + t * bard
-	if y < 0.0:
-		return -1.0
-	if y > baba:
-		return -1.0
-	if t < 0.0:
-		t = (-b + sqrt_d) / a
-		y = baoa + t * bard
-		if t < 0.0 or y < 0.0 or y > baba:
-			return -1.0
-	return t
+	# Caps. `ray_sphere` already rejects hits behind the origin.
+	var cap_a := ray_sphere(origin, ray_dir, a, radius)
+	if cap_a >= 0.0 and (origin + ray_dir * cap_a - a).dot(ba) <= 0.0:
+		best = cap_a if best < 0.0 else minf(best, cap_a)
+	var cap_b := ray_sphere(origin, ray_dir, b, radius)
+	if cap_b >= 0.0 and (origin + ray_dir * cap_b - b).dot(ba) >= 0.0:
+		best = cap_b if best < 0.0 else minf(best, cap_b)
+	return best
 
 
 ## Distance from a point to a line segment.
