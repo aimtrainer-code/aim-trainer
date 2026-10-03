@@ -64,8 +64,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
 		if key.keycode == KEY_ESCAPE:
-			paused = not paused if running else false
-			input_service.release_mouse() if paused else input_service.grab_mouse()
+			if running:
+				paused = not paused
+			if paused:
+				input_service.release_mouse()
+			else:
+				input_service.grab_mouse()
 			status_text = "PAUSED" if paused else "LIVE"
 			queue_redraw()
 
