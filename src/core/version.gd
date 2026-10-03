@@ -8,7 +8,7 @@ extends RefCounted
 ## stay in sync so a release can never ship a mismatched version number.
 
 const MAJOR: int = 0
-const MINOR: int = 1
+const MINOR: int = 2
 const PATCH: int = 0
 const LABEL: String = ""  ## e.g. "beta", "rc1"; empty for a stable build.
 
