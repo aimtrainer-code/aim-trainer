@@ -103,8 +103,11 @@ func _input(event: InputEvent) -> void:
 					input_service.release_mouse()
 				else:
 					input_service.grab_mouse()
-			else:
+			elif screen == Screen.RESULTS:
+				screen = Screen.MENU
 				input_service.release_mouse()
+			else:
+				get_tree().quit()
 			queue_redraw()
 			return
 
@@ -397,7 +400,7 @@ func _draw_menu(size: Vector2) -> void:
 	_draw_text(Vector2(size.x * 0.69, 350), "NO TELEMETRY", 12, Color("#78f2a4"))
 	draw_rect(Rect2(size.x * 0.68, size.y - 125, 260, 58), Color("#dce6ed"), true)
 	_draw_text(Vector2(size.x * 0.68 + 72, size.y - 90), "START DRILL  [ENTER]", 14, Color("#0a0d11"))
-	_draw_text(Vector2(64, size.y - 30), "1–0 SELECT    ENTER START    ESC QUIT", 12, Color("#65727e"))
+	_draw_text(Vector2(64, size.y - 30), "1–0 SELECT    ENTER START    ESC EXIT", 12, Color("#65727e"))
 
 func _draw_run(size: Vector2) -> void:
 	_draw_text(Vector2(28, 42), "VANTA", 22, Color("#f1f4f6"))
